@@ -34,7 +34,7 @@ export class ProjectController {
      
       req.project.projectName = req.body.projectName;
       req.project.clientName = req.body.clientName;
-      req.project.desciption = req.body.desciption;
+      req.project.description = req.body.description;
       await req.project.save();
 
       res.json(req.project);

@@ -13,7 +13,7 @@ router.post(
   "/",
   body("projectName").notEmpty().withMessage("Name is required"),
   body("clientName").notEmpty().withMessage("Client's name is required"),
-  body("desciption").notEmpty().withMessage("Description is required"),
+  body("description").notEmpty().withMessage("Description is required"),
 
   handleInputErrors,
 
@@ -35,7 +35,7 @@ router.put(
   param("id").isMongoId().withMessage("Invalid project ID"),
   body("projectName").notEmpty().withMessage("Name is required"),
   body("clientName").notEmpty().withMessage("Client's name is required"),
-  body("desciption").notEmpty().withMessage("Description is required"),
+  body("description").notEmpty().withMessage("Description is required"),
   handleInputErrors,
   ProjectController.updateProject
 );
