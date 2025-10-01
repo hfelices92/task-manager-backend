@@ -5,6 +5,7 @@ import Project from "../models/Project";
 export class ProjectController {
   static createProject = async (req: Request, res: Response) => {
     const project = new Project(req.body);
+
     try {
       await project.save();
       res.send("Project created successfully");
@@ -30,8 +31,8 @@ export class ProjectController {
   };
 
   static updateProject = async (req: Request, res: Response) => {
+    console.log(colors.yellow(req.body.projectName));
     try {
-     
       req.project.projectName = req.body.projectName;
       req.project.clientName = req.body.clientName;
       req.project.description = req.body.description;

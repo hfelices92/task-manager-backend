@@ -16,7 +16,7 @@ export async function checkTaskExists(
 ) {
   try {
     const taskId = req.params.taskId;
-    const task = await Task.findById(taskId).populate("project");
+    const task = await Task.findById(taskId)
     if (!task) {
       return res.status(404).json({ error: "Task not found" });
     }
@@ -35,7 +35,7 @@ export async function checkTaskBelongsToProject(
 ) {
   try {
     
-    if (req.task.project.id.toString() !== req.project.id.toString()) {
+    if (req.task.project.toString() !== req.project.id.toString()) {
       return res
         .status(400)
         .json({ error: "Task does not belong to this project" });
