@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/AuthController";
-import { body } from "express-validator";
+import { body, param } from "express-validator";
 import { handleInputErrors } from "../middleware/validation";
 
 const router = Router();
@@ -8,7 +8,7 @@ const router = Router();
 // Import controllers
 
 router.post(
-  "/create-user",
+  "/create-account",
   body("name").notEmpty().withMessage("El nombre es obligatorio"),
   body("email").isEmail().withMessage("El email no es válido"),
   body("password")
@@ -25,7 +25,7 @@ router.post(
 );
 
 router.post(
-  "/confirm-user",
+  "/confirm-account",
   body("token").notEmpty().withMessage("El token es obligatorio"),
   handleInputErrors,
   AuthController.confirmUser
@@ -37,5 +37,45 @@ router.post("/login",
   handleInputErrors,
     
   AuthController.loginUser);
+
+router.post(
+  "/request-confirmation-code",
+  body("email").isEmail().withMessage("El email no es válido"),
+  handleInputErrors,
+  AuthController.requestConfirmationCode
+);
+
+
+router.post(
+  "/forgot-password",
+  body("email").isEmail().withMessage("El email no es válido"),
+  handleInputErrors,
+  AuthController.forgotPassword
+);
+
+router.post(
+  "/check-token",
+  body("token").notEmpty().withMessage("El token es obligatorio"),
+  handleInputErrors,
+  AuthController.checkToken
+);
+
+router.post(
+  "/reset-password/:token",
+  param('token').isNumeric().withMessage("Token inválido"),
+  body("password")
+    .isLength({ min: 8 })
+    .withMessage("El nuevo password debe tener al menos 8 caracteres"),
+  body("passwordConfirmation").custom((value, { req }) => {
+    if (value !== req.body.password) {
+      throw new Error("Las contraseñas deben coincidir");
+    }
+    return true;
+  }
+  ),
+  handleInputErrors,
+  AuthController.resetPassword
+);
+
 
 export default router;
