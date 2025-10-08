@@ -6,7 +6,6 @@ export interface IUser extends Document {
   name: string;
   confirmed: boolean;
 }
-
 const UserSchema: Schema = new Schema(
   {
     email: {

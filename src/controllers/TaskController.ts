@@ -30,9 +30,11 @@ export class TaskController {
 
   static getTaskById = async (req: Request, res: Response) => {
     try {
-      console.log(req.task);
+      const task = await Task.findById(req.params.taskId)
+        .populate("completedBy.user", "_id name email")
+        .populate({ path: "notes", populate: { path: "createdBy" , select: "_id name email" } });
 
-      res.json(req.task);
+      res.json(task);
     } catch (error) {
       res.status(500).json({ error: "Server error" });
     }
@@ -52,6 +54,13 @@ export class TaskController {
   static updateTaskStatus = async (req: Request, res: Response) => {
     try {
       req.task.status = req.body.status;
+
+      const data = {
+        user: req.user.id,
+        status: req.body.status,
+        date: Date.now(),
+      };
+      req.task.completedBy.push(data);
       await req.task.save();
       res.json(req.task);
     } catch (error) {
@@ -61,7 +70,6 @@ export class TaskController {
 
   static deleteTask = async (req: Request, res: Response) => {
     try {
-      
       req.project.tasks = req.project.tasks.filter(
         (taskId) => taskId !== req.task.id
       );

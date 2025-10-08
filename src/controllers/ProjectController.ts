@@ -5,7 +5,7 @@ import Project from "../models/Project";
 export class ProjectController {
   static createProject = async (req: Request, res: Response) => {
     const project = new Project(req.body);
-
+    project.manager = req.user.id; // Asignar el ID del usuario autenticado como manager
     try {
       await project.save();
       res.send("Project created successfully");
@@ -15,7 +15,10 @@ export class ProjectController {
   };
   static getAllProjects = async (req: Request, res: Response) => {
     try {
-      const projects = await Project.find({}).populate("tasks");
+      
+      const projects = await Project.find({
+        $or: [{ manager: { $in: req.user.id } }, { team: { $in: req.user.id } }],
+      });
       res.json(projects);
     } catch (error) {
       res.status(500).json({ error: "Server error" });
@@ -23,7 +26,11 @@ export class ProjectController {
   };
 
   static getProjectById = async (req: Request, res: Response) => {
+    const id = req.params.id;
     try {
+      if(req.project.manager.toString() !== req.user.id && !req.project.team.includes(req.user.id)){
+        return res.status(403).json({ error: "Access denied" });
+      }
       res.json(req.project);
     } catch (error) {
       res.status(500).json({ error: "Server error" });
@@ -31,8 +38,10 @@ export class ProjectController {
   };
 
   static updateProject = async (req: Request, res: Response) => {
-    console.log(colors.yellow(req.body.projectName));
     try {
+      if(req.project.manager.toString() !== req.user.id){
+        return res.status(403).json({ error: "Access denied" });
+      }
       req.project.projectName = req.body.projectName;
       req.project.clientName = req.body.clientName;
       req.project.description = req.body.description;
@@ -46,6 +55,9 @@ export class ProjectController {
 
   static deleteProject = async (req: Request, res: Response) => {
     try {
+      if(req.project.manager.toString() !== req.user.id){
+        return res.status(403).json({ error: "Access denied" });
+      }
       await req.project.deleteOne();
       res.json({ message: "Project deleted successfully" });
     } catch (error) {

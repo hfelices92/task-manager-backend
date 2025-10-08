@@ -1,10 +1,10 @@
-import { text, type Request, type Response } from "express";
+import { type Request, type Response } from "express";
 import User from "../models/User";
-import { compare, hash } from "bcrypt";
 import { comparePassword, hashPassword } from "../utils/auth";
 import { generateToken } from "../utils/token";
 import Token from "../models/Token";
 import { AuthEmail } from "../emails/AuthEmail";
+import { generateJWT } from "../utils/jwt";
 
 export class AuthController {
   static createUser = async (req: Request, res: Response) => {
@@ -130,7 +130,8 @@ export class AuthController {
       if (!isMatch)
         return res.status(400).json({ error: "El password es incorrecto" });
 
-      res.json({ user: { id: user._id, name: user.name, email: user.email } });
+      const token = generateJWT({ id: user.id });
+      res.send(token);
     } catch (error) {
       res.status(500).json({ message: "Error al iniciar sesión", error });
     }
@@ -201,5 +202,58 @@ export class AuthController {
     } catch (error) {
       res.status(500).json(error);
     }
+  };
+
+  static user = async (req: Request, res: Response) => {
+    return res.json(req.user);
+  };
+
+  static updateProfile = async (req: Request, res: Response) => {
+    const { name, email } = req.body;
+
+    req.user.name = name;
+    req.user.email = email;
+    const userExists = await User.findOne({ email });
+    if (userExists && userExists._id.toString() !== req.user._id.toString()) {
+      return res
+        .status(409)
+        .json({ error: "Ya existe un usuario con este email" });
+    }
+    try {
+      await req.user.save();
+      res.send("Perfil actualizado correctamente");
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar el perfil" });
+    }
+  };
+
+  static updateCurrentUserPassword = async (req: Request, res: Response) => {
+    const { currentPassword, newPassword } = req.body;
+
+    const user = await User.findById(req.user._id);
+    const isMatch = await comparePassword(currentPassword, user.password);
+    if (!isMatch) {
+      return res
+        .status(401)
+        .json({ error: "El password actual es incorrecto" });
+    }
+    req.user.password = await hashPassword(newPassword);
+    try {
+      await req.user.save();
+      res.send("Password actualizado correctamente");
+    } catch (error) {
+      res.status(500).json({ error: "Error al actualizar el password" });
+    }
+  };
+
+  static checkPassword = async (req: Request, res: Response) => {
+    const { password } = req.body;
+
+    const user = await User.findById(req.user._id);
+    const isMatch = await comparePassword(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ error: "El password es incorrecto" });
+    }
+    res.send("Password correcto");
   };
 }

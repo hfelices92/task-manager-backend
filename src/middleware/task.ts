@@ -45,3 +45,11 @@ export async function checkTaskBelongsToProject(
     res.status(500).json({ error: "Server error" });
   }
 }
+
+
+export function hasAuthorization (req: Request, res: Response, next: NextFunction) {
+    if (req.project.manager.toString() !== req.user.id) {
+      return res.status(403).json({ error: "Usuario no autorizado" });
+    }
+    next();
+}
