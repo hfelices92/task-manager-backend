@@ -28,9 +28,6 @@ export class ProjectController {
   static getProjectById = async (req: Request, res: Response) => {
     const id = req.params.id;
     try {
-      if(req.project.manager.toString() !== req.user.id && !req.project.team.includes(req.user.id)){
-        return res.status(403).json({ error: "Access denied" });
-      }
       res.json(req.project);
     } catch (error) {
       res.status(500).json({ error: "Server error" });
@@ -39,9 +36,7 @@ export class ProjectController {
 
   static updateProject = async (req: Request, res: Response) => {
     try {
-      if(req.project.manager.toString() !== req.user.id){
-        return res.status(403).json({ error: "Access denied" });
-      }
+      
       req.project.projectName = req.body.projectName;
       req.project.clientName = req.body.clientName;
       req.project.description = req.body.description;
@@ -55,9 +50,6 @@ export class ProjectController {
 
   static deleteProject = async (req: Request, res: Response) => {
     try {
-      if(req.project.manager.toString() !== req.user.id){
-        return res.status(403).json({ error: "Access denied" });
-      }
       await req.project.deleteOne();
       res.json({ message: "Project deleted successfully" });
     } catch (error) {

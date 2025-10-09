@@ -1,5 +1,5 @@
 import mongoose, { Schema, Document, PopulatedDoc } from "mongoose";
-import { ITask } from "./Task";
+import Task, { ITask } from "./Task";
 import { IUser } from "./User";
 
 export interface IProject extends Document {
@@ -48,6 +48,16 @@ const ProjectSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+//Middleware to cascade delete tasks when a project is deleted
+ProjectSchema.pre('deleteOne', { document: true }, async function (next) {
+  const projectId = this._id;
+  const tasks = await Task.find({ project: projectId });
+  //  Ejecutar todas las eliminaciones de tareas en paralelo
+  await Promise.all(tasks.map(task => task.deleteOne()));
+  next();
+});
+
 
 const Project = mongoose.model<IProject>("Project", ProjectSchema);
 

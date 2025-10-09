@@ -1,4 +1,5 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
+import Note from "./Note";
 
 const taskStatus = {
   PENDING: "pending",
@@ -72,6 +73,14 @@ const TaskSchema: Schema = new Schema(
   },
   { timestamps: true }
 );
+
+
+//Middleware to cascade delete notes when a task is deleted
+TaskSchema.pre('deleteOne',{document:true }, async function(next) {
+  const taskId = this._id;
+  await Note.deleteMany({ task: taskId });
+  next();
+});
 
 const Task = mongoose.model<ITask>("Task", TaskSchema);
 

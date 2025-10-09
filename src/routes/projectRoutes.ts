@@ -32,6 +32,7 @@ router.get("/", ProjectController.getAllProjects);
 
 router.get(
   "/:id",
+  hasAuthorization,
   param("id").isMongoId().withMessage("Invalid project ID"),
   handleInputErrors,
   ProjectController.getProjectById
@@ -39,6 +40,7 @@ router.get(
 
 router.put(
   "/:id",
+  hasAuthorization,
   param("id").isMongoId().withMessage("Invalid project ID"),
   body("projectName").notEmpty().withMessage("Name is required"),
   body("clientName").notEmpty().withMessage("Client's name is required"),
@@ -49,6 +51,7 @@ router.put(
 
 router.delete(
   "/:id",
+  hasAuthorization,
   param("id").isMongoId().withMessage("Invalid project ID"),
   handleInputErrors,
   ProjectController.deleteProject
