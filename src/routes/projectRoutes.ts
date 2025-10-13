@@ -32,7 +32,6 @@ router.get("/", ProjectController.getAllProjects);
 
 router.get(
   "/:id",
-  hasAuthorization,
   param("id").isMongoId().withMessage("Invalid project ID"),
   handleInputErrors,
   ProjectController.getProjectById

@@ -26,7 +26,9 @@ export class ProjectController {
   };
 
   static getProjectById = async (req: Request, res: Response) => {
-    const id = req.params.id;
+    if (req.project.manager.toString() !== req.user.id && !req.project.team.includes(req.user.id)) {
+      return res.status(403).json({ error: "Usuario no autorizado" });
+    }
     try {
       res.json(req.project);
     } catch (error) {

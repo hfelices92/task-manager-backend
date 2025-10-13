@@ -17,7 +17,11 @@ export async function checkProjectExists(
 ) {
   try {
     const projectId = req.params.projectId || req.params.id;
-    const project = await Project.findById(projectId).populate('tasks');
+    const project = await Project.findById(projectId)
+  .populate({
+    path: 'tasks',
+    options: { sort: { updatedAt: 1} }
+  });
     if (!project) {
       return res.status(404).json({ error: "Project not found" });
     }
